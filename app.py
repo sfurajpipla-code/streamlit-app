@@ -7,7 +7,7 @@ st.title("📊 Simple Streamlit Dashboard")
 @st.cache_data
 def load_data():
     # .strip() use karke extra spaces hatayein agar zaroorat ho
-    return pl.read_csv("data.csv")
+    return pl.read_csv("final_alive_clean.csv")
 
 df = load_data()
 
@@ -15,13 +15,13 @@ df = load_data()
 st.subheader("Filter Data")
 
 # Strip spaces just in case data mein kachra ho
-departments = df["department"].unique().to_list()
+departments = df["RANGE"].unique().to_list()
 selected_dept = st.selectbox("Select Department", ["All"] + sorted(departments))
 
 # Filter Logic (Explicitly check)
 if selected_dept != "All":
     # Yahan filtered_df create ho raha hai
-    filtered_df = df.filter(pl.col("department") == selected_dept)
+    filtered_df = df.filter(pl.col("RANGE") == selected_dept)
 else:
     # All ke case mein original df
     filtered_df = df
@@ -29,19 +29,19 @@ else:
 # --- DISPLAY SECTION ---
 # Dhyaan dein: Hum filtered_df display kar rahe hain
 st.write(f"Displaying: {selected_dept}")
-st.dataframe(filtered_df.to_pandas()) # Polars ko display ke liye pandas mein convert karna safe hai
+st.dataframe(filtered_df) # Polars ko display ke liye pandas mein convert karna safe hai
 
 # --- SUMMARY SECTION ---
 st.subheader("Summary for Selection")
 
 # Summary hamesha FILTERED data par honi chahiye
 if not filtered_df.is_empty():
-    summary = filtered_df.group_by("department").agg(
-        pl.col("salary").mean().alias("avg_salary")
+    summary = filtered_df.group_by("RANGE").agg(
+        pl.col("GIRTH(CM)").mean().alias("avg_girth")
     )
-    st.write(summary.to_pandas())
+    st.write(summary)
     
     # Chart bhi filtered data ka hi banega
-    st.bar_chart(summary.to_pandas(), x="department", y="avg_salary")
+    st.bar_chart(summary, x="RANGE", y="avg_girth")
 else:
     st.warning("No data found for this selection.")
