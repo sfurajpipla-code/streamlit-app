@@ -1,15 +1,26 @@
 import streamlit as st
 import polars as pl
+import requests
+from io import StringIO
 
 st.set_page_config(page_title="Simple Dashboard", layout="wide")
 st.title("📊 Simple Streamlit Dashboard")
 
-@st.cache_data
-def load_data():
-    # .strip() use karke extra spaces hatayein agar zaroorat ho
-    return pl.read_csv("final_alive_clean.csv")
+Dataurl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQaVBNLvbaPYyKmt8WZ5ECI49jTuQmHO2ZVtUm0p0GpMbt3A9E6IrDgchIQx_T8kLnL4W5xp05PIO0k/pub?gid=346820640&single=true&output=csv"
 
-df = load_data()
+@st.cache_data(ttl= 60)
+def load_data(url):
+    res = requests.get(url)
+    csvString = res.text
+    csvfile = StringIO(csvString)
+    df = pl.read_csv(csvfile, infer_schema_length= 20000)
+    return df
+
+    
+
+df = load_data(Dataurl)
+
+st.write(f"{df.height}")
 
 # --- FILTER SECTION ---
 st.subheader("Filter Data")
